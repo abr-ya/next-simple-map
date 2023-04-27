@@ -1,17 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import MapGL, { Marker } from "react-map-gl";
+import MapGL, { Marker, MarkerDragEvent } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { EventData, MapMouseEvent } from "mapbox-gl";
+import { EventData, MapMouseEvent, MapboxEvent } from "mapbox-gl";
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const Map = () => {
   const [viewState, setViewState] = useState({
-    latitude: 41.09,
-    longitude: 14.1,
-    zoom: 8,
+    latitude: 50.08,
+    longitude: 14.42,
+    zoom: 10,
   });
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   // const [popupInfo, setPopupInfo] = useState(null);
@@ -21,8 +21,20 @@ const Map = () => {
 
   const handleClick = (evt: MapMouseEvent & EventData) => {
     const coord = evt.lngLat;
-    console.log(coord);
+    console.log("set to:", coord);
     setMarker(coord);
+  };
+
+  const dragHandler = (evt: MarkerDragEvent & EventData) => {
+    const coord = evt.lngLat;
+    console.log("drag to:", coord);
+    setMarker(coord);
+  };
+
+  const clickHandler = (evt: MapboxEvent<MouseEvent> & EventData) => {
+    evt.originalEvent.stopPropagation();
+    console.log("click to marker");
+    setMarker(null);
   };
 
   return (
@@ -41,7 +53,15 @@ const Map = () => {
       >
         {marker && (
           <div>
-            <Marker longitude={marker.lng} latitude={marker.lat} anchor="center" color="red" />
+            <Marker
+              longitude={marker.lng}
+              latitude={marker.lat}
+              anchor="center"
+              color="red"
+              draggable
+              onDragEnd={(evt) => dragHandler(evt)}
+              onClick={(evt) => clickHandler(evt)}
+            />
           </div>
         )}
 
